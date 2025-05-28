@@ -1,0 +1,38 @@
+@font-face {
+    font-family: 'Krabby Patty';
+    src: url("./assets/Krabby-Patty.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+html {
+    --lumo-font-family: 'Krabby Patty', sans-serif;
+}
+
+.logo {
+    width: 64px;
+    height:  64px;
+    background: url("./assets/logo.png") no-repeat center center;
+    background-size: contain;
+}
+
+.main-view-content {
+    width: 700px;
+    height: 500px;
+    margin: 20px auto;
+    background: url("./assets/todolist.jpg") no-repeat center center;
+    background-size: contain;
+    background-color: white;
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Soft shadow */
+}
+
+vaadin-app-layout {
+    background-color: #FFEC8B;
+}
+
+.toolbar-bikini-bottom {
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Krabby Patty', sans-serif;
+}

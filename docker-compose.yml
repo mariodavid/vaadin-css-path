@@ -1,0 +1,66 @@
+services:
+  # -----------------------------------------------------------------------------
+  # Reverse proxy configuration with Traefik
+  #
+  # This docker-compose.yml defines:
+  #   - Traefik as a reverse proxy using the Docker provider
+  #   - Service "tasks" under context path /tasks
+  #   - Service "tasks-direct" under root context for direct access (e.g., tests)
+  #
+  # Traefik configuration:
+  #   * EntryPoint "web" on port 80
+  #   * Requests to /tasks are routed to the "tasks" service, preserving the /tasks prefix (mirror)
+  #
+  # tasks service:
+  #   - Environment: SERVER_SERVLET_CONTEXT_PATH=/tasks
+  #   - traefik.http.routers.tasks.rule=PathPrefix(`/tasks`)
+  #     - preserves the /tasks prefix so that the backend service sees the same context path
+  #   - traefik.http.services.tasks.loadbalancer.server.port=8080
+  #
+  # Access patterns:
+  #   http://<host>/tasks/... → tasks service (prefix /tasks is preserved)
+  #   http://<host>:8081/... → tasks-direct service
+  # -----------------------------------------------------------------------------
+  traefik:
+    image: traefik:2.10
+    command:
+      - --providers.docker=true
+      - --entrypoints.web.address=:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+
+  tasks-proxy:
+    build:
+      context: .
+    environment:
+      - SERVER_SERVLET_CONTEXT_PATH=/tasks
+      - SERVER_PORT=8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tasks.rule=PathPrefix(`/tasks`)
+      - traefik.http.routers.tasks.entrypoints=web
+      - traefik.http.services.tasks.loadbalancer.server.port=8080
+    networks:
+      web:
+
+
+  # tasks-direct service:
+  #   - Environment: SERVER_SERVLET_CONTEXT_PATH=/
+  tasks-direct:
+    build:
+      context: .
+    environment:
+      - SERVER_SERVLET_CONTEXT_PATH=/
+      - SERVER_PORT=8080
+    ports:
+      - 8081:8080
+    networks:
+      web:
+
+networks:
+  web:
+    driver: bridge
